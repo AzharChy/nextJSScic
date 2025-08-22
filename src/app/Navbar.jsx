@@ -3,20 +3,27 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useSession, signOut } from "next-auth/react";
+import { ModeToggle } from "@/Components/ThemeToggle";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const { data: session } = useSession();
+  const isLoggedIn = !!session;
+  const username = session?.user?.name;
+
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/products", label: "All Products" },
-    { href: "/about", label: "About Us" },
+    
     { href: "/faq", label: "FAQ" },
+    {href: "/Dashboard/add-product", label:"Dashboard" }
   ];
 
   return (
-    <header className="bg-gray-900 text-white">
+    <header className="bg-gray-900 text-white sticky top-0 left-0 z-50">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
@@ -46,15 +53,39 @@ export default function Navbar() {
                 {link.label}
               </Link>
             </li>
+           
           ))}
+          <li><ModeToggle /></li>
         </ul>
 
-        {/* Desktop Buttons */}
+        {/* Desktop Auth Section */}
         <div className="hidden lg:flex items-center space-x-4">
-          <button className="px-6 py-2 rounded hover:bg-gray-800">Sign in</button>
-          <button className="px-6 py-2 rounded bg-violet-600 text-white hover:bg-violet-700">
-            Sign up
-          </button>
+          {isLoggedIn ? (
+            <>
+              <span className="font-medium text-violet-400">
+                Hello, {username}
+              </span>
+              <button
+                onClick={() => signOut({ callbackUrl: "/auth/login" })}
+                className="px-6 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/auth/login">
+                <button className="px-6 py-2 rounded bg-violet-600 text-white hover:bg-violet-700">
+                  Sign In
+                </button>
+              </Link>
+              <Link href="/auth/register">
+                <button className="px-6 py-2 rounded bg-violet-600 text-white hover:bg-violet-700">
+                  Register
+                </button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -63,7 +94,6 @@ export default function Navbar() {
           className="lg:hidden p-2"
         >
           {mobileOpen ? (
-            // Close icon
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -79,7 +109,6 @@ export default function Navbar() {
               />
             </svg>
           ) : (
-            // Hamburger icon
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -120,50 +149,44 @@ export default function Navbar() {
           </ul>
 
           <div className="pt-2 space-y-2">
-            <button className="w-full px-6 py-2 rounded bg-gray-700 hover:bg-gray-600">
-              Sign in
-            </button>
-            <button className="w-full px-6 py-2 rounded bg-violet-600 text-white hover:bg-violet-700">
-              Sign up
-            </button>
+            {isLoggedIn ? (
+              <>
+                <span className="block text-violet-400 font-medium">
+                  Hello, {username}
+                </span>
+                <button
+                  onClick={() => {
+                    signOut({ callbackUrl: "/auth/login" });
+                    setMobileOpen(false);
+                  }}
+                  className="w-full px-6 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/auth/login">
+                  <button
+                    onClick={() => setMobileOpen(false)}
+                    className="w-full px-6 py-2 rounded bg-violet-600 text-white hover:bg-violet-700"
+                  >
+                    Sign In
+                  </button>
+                </Link>
+                <Link href="/auth/register">
+                  <button
+                    onClick={() => setMobileOpen(false)}
+                    className="w-full px-6 py-2 rounded bg-violet-600 text-white hover:bg-violet-700"
+                  >
+                    Register
+                  </button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}
     </header>
   );
 }
-
-
-
-
-
-// const { MongoClient, ServerApiVersion } = require('mongodb');
-// const uri = "mongodb+srv://<db_username>:<db_password>@cluster0.khlwlbn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-
-// // Create a MongoClient with a MongoClientOptions object to set the Stable API version
-// const client = new MongoClient(uri, {
-//   serverApi: {
-//     version: ServerApiVersion.v1,
-//     strict: true,
-//     deprecationErrors: true,
-//   }
-// });
-
-// async function run() {
-//   try {
-//     // Connect the client to the server	(optional starting in v4.7)
-//     await client.connect();
-//     // Send a ping to confirm a successful connection
-//     await client.db("admin").command({ ping: 1 });
-//     console.log("Pinged your deployment. You successfully connected to MongoDB!");
-//   } finally {
-//     // Ensures that the client will close when you finish/error
-//     await client.close();
-//   }
-// }
-// run().catch(console.dir);
-
-
-
-
-

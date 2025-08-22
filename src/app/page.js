@@ -1,37 +1,74 @@
 "use client";
 
-export default function Home() {
-  return (
-   <div>
-    {/* banner section */}
-   <div className="p-6 py-12 dark:bg-violet-600 dark:text-gray-50">
-	<div className="container mx-auto">
-		<div className="flex flex-col lg:flex-row items-center justify-between">
-			<h2 className="text-center text-6xl tracking-tighter font-bold">Up to
-				<br  className="sm:hidden" />50% Off
-			</h2>
-			<div className="space-x-2 text-center py-2 lg:py-0">
-				<span>Plus free shipping! Use code:</span>
-				<span className="font-bold text-lg">MAMBA</span>
-			</div>
-			<a href="#" rel="noreferrer noopener" className="px-5 mt-4 lg:mt-0 py-3 rounded-md border block dark:bg-gray-900 dark:text-gray-50 dark:border-gray-600">Shop Now</a>
-		</div>
-	</div>
-</div>
+import { useEffect, useState } from "react";
+import bannerImg from '../app/products/banner.webp'
+import Image from "next/image";
 
-<div>
-  <h1 className="text-center text-2xl">Product Highlghits</h1>
-  <div>
-    <div className="max-w-xs p-6 rounded-md shadow-md dark:bg-gray-50 dark:text-gray-900">
-	<img src="https://source.unsplash.com/random/300x300/?1" alt="" className="object-cover object-center w-full rounded-md h-72 dark:bg-gray-500" />
-	<div className="mt-6 mb-2">
-		<span className="block text-xs font-medium tracking-widest uppercase dark:text-violet-600">Quisque</span>
-		<h2 className="text-xl font-semibold tracking-wide">Nam maximus purus</h2>
-	</div>
-	<p className="dark:text-gray-800">Mauris et lorem at elit tristique dignissim et ullamcorper elit. In sed feugiat mi. Etiam ut lacinia dui.</p>
-</div>
-  </div>
-</div>
-   </div>
+export default function Home() {
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    // Fetch 6 random products from the API
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("/api/products");
+        const data = await res.json();
+
+        // Pick 6 random products
+        const randomProducts = data
+          .sort(() => 0.5 - Math.random())
+          .slice(0, 6);
+
+        setProducts(randomProducts);
+      } catch (err) {
+        console.error("Failed to fetch products:", err);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  return (
+    <div>
+      {/* Banner Section */}
+      
+        <div className="container mx-auto text-center">
+          {/* Add your image here */}
+          <Image src={bannerImg}  width={1280}
+      height={200}
+      alt="Picture of the author"></Image>
+          
+          
+        </div>
+ 
+
+      {/* Product Highlights */}
+      <div className="my-12 container mx-auto">
+        <h1 className="text-center text-2xl font-semibold mb-6">
+          Product Highlights
+        </h1>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {products.map((product) => (
+            <div
+              key={product._id}
+              className="border rounded-lg p-4 shadow hover:shadow-lg transition"
+            >
+              <img
+                src={product.image || "/placeholder.png"}
+                alt={product.title}
+                className="w-full h-48 object-cover rounded-md mb-4"
+              />
+              <h2 className="text-lg font-semibold">{product.title}</h2>
+              <p className="text-gray-600">{product.description}</p>
+              <p className="mt-2 font-bold">${product.price}</p>
+              <button className="mt-4 w-full p-2 bg-violet-600 text-white rounded hover:bg-violet-700">
+                Buy Now
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
